@@ -20,3 +20,13 @@ Modify lv_config.h:
     #define LV_FS_STDIO_PATH       "/sdcard"  // must match SD_MMC.begin()'s mount point
     #define LV_FS_STDIO_CACHE_SIZE 1024
 #endif
+
+
+Image Conversion:
+Convert images from .PNG to .BIN @https://lvgl.io/tools/imageconverter
+<img width="733" height="609" alt="image" src="https://github.com/user-attachments/assets/5f1f449a-8640-40fc-8651-239b3e128da7" />
+Version: LVGL v8
+Color format: CF_TRUE_COLOR
+Output format: Binary RGB565
+64x64 pixel images
+
