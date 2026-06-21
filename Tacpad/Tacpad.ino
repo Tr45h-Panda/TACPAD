@@ -12,6 +12,7 @@
 #include "Touch_CST328.h"
 #include "BAT_Driver.h"
 #include "Wireless.h"
+#include "BLE_Driver.h"
 // #include "Simulated_Gesture.h"
 
 
@@ -36,6 +37,20 @@ void Driver_Loop() {
     0                     
   );  
 }
+
+// calls BLE_Driver.cpp to initialize bluetooth connection
+void BLE_Loop() {
+  Serial.begin(115200);
+  xTaskCreate(
+        bluetoothTask,
+        "BLE",
+        8192,
+        nullptr,
+        1,
+        nullptr
+  );
+}
+
 void setup()
 {
   Flash_test();
@@ -45,6 +60,9 @@ void setup()
 
   I2C_Init();
   Touch_Init();
+
+  BLE_Loop();
+
   // PCF85063_Init();
   // QMI8658_Init();
   Backlight_Init();
