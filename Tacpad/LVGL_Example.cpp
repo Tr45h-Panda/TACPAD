@@ -1,9 +1,25 @@
 #include "LVGL_Example.h"
 #include "LVGL_Music.h"
 #include <demos/lv_demos.h>
+#include "BLE_Driver.h"
 // #include <demos/music/lv_demo_music_main.h>
 // #include <demos/music/lv_demo_music_list.h>
 
+
+/*********************
+ *      STRAT ARRAY
+ **********************/
+const char* btnArray[] = {
+  "DDUR", //resuply
+  "DULDURDU", //hellbomb
+  "DURULU", //autocannon sentry
+  "DURRU", //machine gun sentry
+  "DDLUR", //EAT
+  "URUD", //eagle smoke
+  "RDURD", //orbital laser
+  "DUUDU", //jump pack
+  "DURL", //gatling sentry
+};
 
 /**********************
  *      TYPEDEFS
@@ -149,6 +165,12 @@ static void grid_btn_event_cb(lv_event_t * e)
   uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
   printf("Automatic grid button %d pressed\r\n", idx);
   // TODO: whatever each of the 9 buttons should actually do
+  if (isBleConnected && !sent) {
+    delay(20);
+    sendKeySequence(btnArray[idx]);
+    printf("Sent key sequence\r\n", btnArray[idx]);  
+    // sent = true;
+    }
 }
 
 void Lvgl_Example1(void){
