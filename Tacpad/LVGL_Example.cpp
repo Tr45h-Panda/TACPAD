@@ -1,25 +1,9 @@
 #include "LVGL_Example.h"
 #include "LVGL_Music.h"
 #include <demos/lv_demos.h>
-#include "BLE_Driver.h"
 // #include <demos/music/lv_demo_music_main.h>
 // #include <demos/music/lv_demo_music_list.h>
 
-
-/*********************
- *      STRAT ARRAY
- **********************/
-const char* btnArray[] = {
-  "DDUR", //resuply
-  "DULDURDU", //hellbomb
-  "DURULU", //autocannon sentry
-  "DURRU", //machine gun sentry
-  "DDLUR", //EAT
-  "URUD", //eagle smoke
-  "RDURD", //orbital laser
-  "DUUDU", //jump pack
-  "DURL", //gatling sentry
-};
 
 /**********************
  *      TYPEDEFS
@@ -45,6 +29,10 @@ static void calendar_event_cb(lv_event_t * e);
 void IRAM_ATTR example1_increase_lvgl_tick(lv_timer_t * t);
 static void Automatic_grid_create(lv_obj_t * parent);
 static void grid_btn_event_cb(lv_event_t * e);
+static lv_obj_t * DPad_btn_create(lv_obj_t * parent, const char * fileName, const char * imgPath,
+                                   lv_coord_t x_ofs, lv_coord_t y_ofs, uint32_t dir_idx);
+static void dpad_btn_event_cb(lv_event_t * e);
+static void Manual_dpad_create(lv_obj_t * parent);
 
 /**********************
  *  STATIC VARIABLES
@@ -165,12 +153,47 @@ static void grid_btn_event_cb(lv_event_t * e)
   uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
   printf("Automatic grid button %d pressed\r\n", idx);
   // TODO: whatever each of the 9 buttons should actually do
-  if (isBleConnected && !sent) {
-    delay(20);
-    sendKeySequence(btnArray[idx]);
-    printf("Sent key sequence\r\n", btnArray[idx]);  
-    // sent = true;
-    }
+}
+
+static lv_obj_t * DPad_btn_create(lv_obj_t * parent, const char * fileName, const char * imgPath,
+                                   lv_coord_t x_ofs, lv_coord_t y_ofs, uint32_t dir_idx)
+{
+  lv_obj_t * btn;
+
+  if (File_Search("/images", fileName)) {
+    btn = lv_imgbtn_create(parent);
+    lv_imgbtn_set_src(btn, LV_IMGBTN_STATE_RELEASED, NULL, imgPath, NULL);
+  } else {
+    printf("SD : %s not found, falling back to placeholder button\r\n", fileName);
+    btn = lv_label_create(parent);
+    lv_label_set_text(btn, LV_SYMBOL_IMAGE);
+    lv_obj_set_style_text_font(btn, &lv_font_montserrat_14, 0);
+    lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
+  }
+
+  lv_obj_set_size(btn, 50, 50);
+  lv_obj_align(btn, LV_ALIGN_CENTER, x_ofs, y_ofs);
+  lv_obj_add_flag(btn, LV_OBJ_FLAG_GESTURE_BUBBLE);   // keeps swipe-to-switch-screens working here too
+  lv_obj_add_event_cb(btn, dpad_btn_event_cb, LV_EVENT_CLICKED, (void*)(uintptr_t)dir_idx);
+  return btn;
+}
+
+static void dpad_btn_event_cb(lv_event_t * e)
+{
+  uint32_t dir = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+  static const char * names[4] = {"UP", "DOWN", "LEFT", "RIGHT"};
+  printf("Manual D-pad: %s pressed\r\n", names[dir]);
+  // TODO: actual jog/move action per direction
+}
+
+static void Manual_dpad_create(lv_obj_t * parent)
+{
+  const lv_coord_t OFS = 60;   // center-to-center distance; bump up/down to taste
+
+  DPad_btn_create(parent, "UpArrow.bin",    "S:/images/UpArrow.bin",     0,   -OFS, 0);
+  DPad_btn_create(parent, "DownArrow.bin",  "S:/images/DownArrow.bin",   0,    OFS, 1);
+  DPad_btn_create(parent, "LeftArrow.bin",  "S:/images/LeftArrow.bin", -OFS,    0,  2);
+  DPad_btn_create(parent, "RightArrow.bin", "S:/images/RightArrow.bin", OFS,    0,  3);
 }
 
 void Lvgl_Example1(void){
@@ -225,14 +248,16 @@ void Lvgl_Example1(void){
   }
 
   lv_obj_t * img_btn1 = Image_tab_create(screens[0], "AutomaticIcon_64.bin", "S:/images/AutomaticIcon_64.bin");
-  lv_obj_t * img_btn2 = Image_tab_create(screens[1], "ManualIcon_64.bin", "S:/images/ManualIcon_64.bin");
+  //lv_obj_t * img_btn2 = Image_tab_create(screens[1], "ManualIcon_64.bin", "S:/images/ManualIcon_64.bin");
   // lv_obj_t * img_btn3 = Image_tab_create(screens[2], "icon3.bin", "S:/images/icon3.bin");
+  
+  Manual_dpad_create(screens[1]);
   Automatic_grid_create(screens[2]);
 
 
   // gestures only bubble up if the touched child opts in
   lv_obj_add_flag(img_btn1, LV_OBJ_FLAG_GESTURE_BUBBLE);
-  lv_obj_add_flag(img_btn2, LV_OBJ_FLAG_GESTURE_BUBBLE);
+  // lv_obj_add_flag(img_btn2, LV_OBJ_FLAG_GESTURE_BUBBLE);
   // lv_obj_add_flag(img_btn3, LV_OBJ_FLAG_GESTURE_BUBBLE);
 
   show_screen(0);   // start on screen 0; hides the other two
