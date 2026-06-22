@@ -1,0 +1,109 @@
+ID,Name,Border,Command,filename
+1,MG-43 Machine Gun,BLUE,DLDUR,image1.bin
+2,EAT-17 Expendable Anti-Tank,BLUE,DDLUR,image2.bin
+3,M-105 Stalwart,BLUE,DLDUUL,image3.bin
+4,LAS-98 Laser Cannon,BLUE,DLDUL,image4.bin
+5,APW-1 Anti-Materiel Rifle,BLUE,DLRUD,image5.bin
+6,GL-21 Grenade Launcher,BLUE,DLULD,image6.bin
+7,GR-8 Recoilless Rifle,BLUE,DLRRL,image7.bin
+8,FLAM-40 Flamethrower,BLUE,DLUDU,image8.bin
+9,MG-206 Heavy Machine Gun,BLUE,DLUDD,image9.bin
+10,AC-8 Autocannon,BLUE,DLDUUR,image10.bin
+11,ARC-3 Arc Thrower,BLUE,DRDULL,image11.bin
+12,LAS-99 Quasar Cannon,BLUE,DDULR,image12.bin
+13,RL-77 Airburst Rocket Launcher,BLUE,DUULR,image13.bin
+14,MLS-4X Commando,BLUE,DLUDR,image14.bin
+15,FAF-14 Spear,BLUE,DDUDD,image15.bin
+16,RS-422 Railgun,BLUE,DRDULR,image16.bin
+17,StA-X3 W.A.S.P. Launcher,BLUE,DDUDR,image17.bin
+18,CQC-20 Breaching Hammer,BLUE,DLRLU,image18.bin
+19,PLAS-45 Epoch,BLUE,DLULR,image19.bin
+20,MGX-42 Bullet Storm,BLUE,DLDRUL,image20.bin
+21,S-11 Speargun,BLUE,DRDLUR,image21.bin
+22,CQC-9 Defoliation Tool,BLUE,DLRRD,image22.bin
+23,TX-41 Sterilizer,BLUE,DLUDL,image23.bin
+24,EAT-700 Expendable Napalm,BLUE,DDLUL,image24.bin
+25,EAT-411 Leveller,BLUE,DDLUD,image25.bin
+26,GL-52 De-Escalator,BLUE,DRULR,image26.bin
+27,GL-28 Belt-Fed Grenade Launcher,BLUE,DLULUU,image27.bin
+28,B/MD C4 Pack,BLUE,DRUURU,image28.bin
+29,MS-11 Solo Silo,BLUE,DURDD,image29.bin
+30,B/FLAM-80 Cremator,BLUE,DDRDUU,image30.bin
+31,M-1000 Maxigun,BLUE,DLRDUU,image31.bin
+32,CQC-1 One True Flag,BLUE,DLRRU,image32.bin
+33,Orbital Precision Strike,RED,RRU,image33.bin
+34,Orbital Gatling Barrage,RED,RDLUU,image34.bin
+35,Orbital Gas Strike,RED,RRDR,image35.bin
+36,Orbital 120mm HE Barrage,RED,RRDLRD,image36.bin
+37,Orbital Airburst Strike,RED,RRR,image37.bin
+38,Orbital Smoke Strike,RED,RRDU,image38.bin
+39,Orbital EMS Strike,RED,RRLD,image39.bin
+40,Orbital 380mm HE Barrage,RED,RDUULDD,image40.bin
+41,Orbital Walking Barrage,RED,RDRDRD,image41.bin
+42,Orbital Laser,RED,RDURD,image42.bin
+43,Orbital Napalm Barrage,RED,RRDLRU,image43.bin
+44,Orbital Railcannon Strike,RED,RUDDR,image44.bin
+45,Eagle Strafing Run,RED,URR,image45.bin
+46,Eagle Airstrike,RED,URDR,image46.bin
+47,Eagle Cluster Bomb,RED,URDDR,image47.bin
+48,Eagle Smoke Strike,RED,URUD,image48.bin
+49,Eagle Napalm Airstrike,RED,URDU,image49.bin
+50,Eagle 110mm Rocket Pods,RED,URUL,image50.bin
+51,Eagle 500kg Bomb,RED,URDDD,image51.bin
+52,MD-6 Anti-Personnel Minefield,GREEN,DLUR,image52.bin
+53,MD-I4 Incendiary Mines,GREEN,DLLD,image53.bin
+54,MD-17 Anti-Tank Mines,GREEN,DLUU,image54.bin
+55,FX-12 Shield Generator Relay,GREEN,DDLRLR,image55.bin
+56,E/MG-101 HMG Emplacement,GREEN,DULRRL,image56.bin
+57,E/GL-21 Grenadier Battlement,GREEN,DRDLR,image57.bin
+58,MD-8 Gas Mines,GREEN,DLLR,image58.bin
+59,E/AT-12 Anti-Tank Emplacement,GREEN,DULRRR,image59.bin
+60,A/MG-43 Machine Gun Sentry,GREEN,DURRU,image60.bin
+61,A/G-16 Gatling Sentry,GREEN,DURL,image61.bin
+62,A/AC-8 Autocannon Sentry,GREEN,DURULU,image62.bin
+63,A/M-12 Mortar Sentry,GREEN,DURRD,image63.bin
+64,A/MLS-4X Rocket Sentry,GREEN,DURRL,image64.bin
+65,A/ARC-3 Tesla Tower,GREEN,DURULR,image65.bin
+66,A/M-23 EMS Mortar Sentry,GREEN,DURDR,image66.bin
+67,A/LAS-98 Laser Sentry,GREEN,DURDUR,image67.bin
+68,A/FLAM-40 Flame Sentry,GREEN,DURDUU,image68.bin
+69,A/GM-17 Gas Mortar Sentry,GREEN,DURDL,image69.bin
+70,B-1 Supply Pack,BLUE,DLDUUD,image70.bin
+71,LIFT-850 Jump Pack,BLUE,DUUDU,image71.bin
+72,SH-20 Ballistic Shield Backpack,BLUE,DLDDUL,image72.bin
+73,AX/AR-23 Guard Dog,BLUE,DULURD,image73.bin
+74,AX/LAS-5 Rover,BLUE,DULURR,image74.bin
+75,SH-32 Shield Generator Pack,BLUE,DULRLR,image75.bin
+76,SH-51 Directional Shield,BLUE,DULRUU,image76.bin
+77,AX/FLAM-75 Hot Dog,BLUE,DULULL,image77.bin
+78,B-100 Portable Hellbomb,BLUE,DRUUU,image78.bin
+79,AX/ARC-3 K-9,BLUE,DULURL,image79.bin
+80,LIFT-860 Hover Pack,BLUE,DUUDLR,image80.bin
+81,AX/TX-13 Dog Breath,BLUE,DULURU,image81.bin
+82,LIFT-182 Warp Pack,BLUE,DLRDLR,image82.bin
+83,M-103 Supply FRV,BLUE,LDLLDUR,image83.bin
+84,M-104 Incinerator FRV,BLUE,LDRLDUU,image84.bin
+85,EXO-49 Emancipator Exosuit,BLUE,LDRULDU,image85.bin
+86,EXO-45 Patriot Exosuit,BLUE,LDRULDD,image86.bin
+87,M-102 Fast Recon Vehicle,BLUE,LDRDRDU,image87.bin
+88,TD-220 Bastion MK XVI,BLUE,LDRDLDUDU,image88.bin
+89,EXO-55 Breakthrough Exosuit,BLUE,LDRLRDU,image89.bin
+90,EXO-51 Lumberer Exosuit,BLUE,LDRURLU,image90.bin
+91,Call In Super Destroyer,GOLD,UUDDLRLR,image91.bin
+92,Eagle Rearm,GOLD,UULUR,image92.bin
+93,Reinforce,GOLD,UDRLU,image93.bin
+94,Resupply,GOLD,DDUR,image94.bin
+95,SoS Beacon,GOLD,UDRU,image95.bin
+96,Cargo Container,GOLD,UUDDRD,image96.bin
+97,Dark Fluid Vessel,GOLD,ULRDUU,image97.bin
+98,NUX-223 Hellbomb,GOLD,DULDURDU,image98.bin
+99,SEAF Artillery,GOLD,RUUD,image99.bin
+100,Seismic Probe,GOLD,UULRDD,image100.bin
+101,Super Earth Flag,GOLD,DUDU,image101.bin
+102,Tectonic Drill,GOLD,UDUDUD,image102.bin
+103,Upload Data,GOLD,LRUUU,image103.bin
+104,Hive Breaker Drill,GOLD,LUDRDD,image104.bin
+105,Prospecting Drill,GOLD,DDLRDD,image105.bin
+106,Reinforcement Pods,GOLD,LRUUU,image106.bin
+107,SSSD Delivery,GOLD,DDDDDUU,image107.bin
+108,Orbital Illumination Flare,GOLD,RRLL,image108.bin
