@@ -8,5 +8,7 @@ extern bool sent;
 
 void bluetoothTask(void* parameter);
 void sendKeySequence(const char* sequence);
+void BLE_Queue_Init(void);
+void Queue_KeySequence(const char* sequence);
 
 #endif
