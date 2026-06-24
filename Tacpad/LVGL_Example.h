@@ -1,9 +1,9 @@
 #pragma once
 
 #include "LVGL_Driver.h"
-#include "Gyro_QMI8658.h"
+// #include "Gyro_QMI8658.h"
 #include "Display_ST7789.h"
-#include "RTC_PCF85063.h"
+// #include "RTC_PCF85063.h"
 #include "SD_MMC.h"
 #include "Wireless.h"
 #include "BAT_Driver.h"

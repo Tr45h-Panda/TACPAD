@@ -3,8 +3,6 @@
 
 #include "Display_ST7789.h"
 #include "Audio_PCM5101.h"
-// #include "RTC_PCF85063.h"
-// #include "Gyro_QMI8658.h"
 #include "LVGL_Driver.h"
 #include "PWR_Key.h"
 #include "SD_Card.h"
@@ -12,16 +10,16 @@
 #include "Touch_CST328.h"
 #include "BAT_Driver.h"
 #include "Wireless.h"
-//#include "Simulated_Gesture.h"
+#include "BLE_Driver.h"
+#include "Stratagem_Data.h"
+#include "I2C_Driver.h"
 
 
 void DriverTask(void *parameter) {
-  // Wireless_Test2();
+
   while(1){
     PWR_Loop();
     BAT_Get_Volts();
-    // PCF85063_Loop();
-    // QMI8658_Loop(); 
     vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
@@ -36,6 +34,20 @@ void Driver_Loop() {
     0                     
   );  
 }
+
+// calls BLE_Driver.cpp to initialize bluetooth connection
+void BLE_Loop() {
+  Serial.begin(115200);
+  xTaskCreate(
+        bluetoothTask,
+        "BLE",
+        8192,
+        nullptr,
+        1,
+        nullptr
+  );
+}
+
 void setup()
 {
   Flash_test();
@@ -45,25 +57,20 @@ void setup()
 
   I2C_Init();
   Touch_Init();
-  // PCF85063_Init();
-  // QMI8658_Init();
+
+  BLE_Loop();
+  BLE_Queue_Init();
   Backlight_Init();
 
   SD_Init();
+  Stratagem_LoadCSV("/Stratagems.csv");
+  Stratagem_LoadLoadout("/loadout.txt");
 
   Audio_Init();
   LCD_Init();
   Lvgl_Init();
 
   Lvgl_Example1();
-
-  // lv_demo_widgets();               
-  // lv_demo_benchmark();          
-  // lv_demo_keypad_encoder();     
-  // lv_demo_music();              
-  // lv_demo_printer();
-  // lv_demo_stress();   
-  // Simulated_Touch_Init();
 
   Driver_Loop();
 

@@ -141,6 +141,40 @@ void bluetoothTask(void*) {
     vTaskDelete(nullptr);
 }
 
+#define KEY_QUEUE_LEN   8
+#define KEY_SEQ_MAXLEN  16
+
+static QueueHandle_t key_queue;
+
+struct KeySeqMsg {
+  char text[KEY_SEQ_MAXLEN];
+};
+
+static void KeySequenceTask(void *parameter)
+{
+  KeySeqMsg msg;
+  while (1) {
+    if (xQueueReceive(key_queue, &msg, portMAX_DELAY) == pdTRUE) {
+      sendKeySequence(msg.text);   // blocking is fine here — this task has nothing else to do
+    }
+  }
+}
+
+void BLE_Queue_Init(void)
+{
+  key_queue = xQueueCreate(KEY_QUEUE_LEN, sizeof(KeySeqMsg));
+  xTaskCreate(KeySequenceTask, "KeySeqTask", 4096, NULL, 1, NULL);
+}
+
+void Queue_KeySequence(const char* sequence)
+{
+  KeySeqMsg msg;
+  strlcpy(msg.text, sequence, sizeof(msg.text));
+  if (xQueueSend(key_queue, &msg, 0) != pdTRUE) {
+    printf("BLE : key sequence queue full, dropped '%s'\r\n", sequence);
+  }
+}
+
 void sendKeySequence(const char* sequence) 
 {
 
