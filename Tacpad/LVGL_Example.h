@@ -21,3 +21,6 @@ void Lvgl_Example1(void);
 void LVGL_Backlight_adjustment(uint8_t Backlight);
 static lv_obj_t * Image_tab_create(lv_obj_t * parent, const char * fileName, const char * imgPath);
 static void tab_icon_event_cb(lv_event_t * e);
+void Automatic_grid_refresh(void);
+void Splash_Show(void);
+void Splash_Hide(void);

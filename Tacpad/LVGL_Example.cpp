@@ -3,7 +3,7 @@
 #include "BLE_Driver.h"
 #include "Stratagem_Data.h"   
 #include "SD_Card.h"
-
+#include "Audio_PCM5101.h"
 
 /**********************
  *      TYPEDEFS
@@ -67,6 +67,9 @@ lv_obj_t *Page_panel[50];
 lv_obj_t *Simulated_panel1[100];
 size_t Simulated_panel1_Size;
 
+static void Settings_panel_create(lv_obj_t * parent);
+static void loadout_dropdown_event_cb(lv_event_t * e);
+static void play_sfx_async(void * data);
 static lv_obj_t * screens[3];
 static uint8_t active_screen = 0;
 
@@ -77,6 +80,53 @@ static void show_screen(uint8_t idx)
     else          lv_obj_add_flag(screens[i], LV_OBJ_FLAG_HIDDEN);
   }
   active_screen = idx;
+}
+
+static lv_obj_t * splash_bg = NULL;
+static lv_obj_t * splash_img = NULL;
+
+static void Lvgl_Pump(uint32_t duration_ms)
+{
+  uint32_t start = millis();
+  while (millis() - start < duration_ms) {
+    lv_timer_handler();   // manually drives rendering/animation since loop() hasn't started yet
+    delay(5);
+  }
+}
+
+void Splash_Show(void)
+{
+  splash_bg = lv_obj_create(lv_scr_act());
+  lv_obj_set_size(splash_bg, LVGL_WIDTH, LVGL_HEIGHT);
+  lv_obj_set_pos(splash_bg, 0, 0);
+  lv_obj_clear_flag(splash_bg, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_width(splash_bg, 0, 0);
+  lv_obj_set_style_radius(splash_bg, 0, 0);
+  lv_obj_set_style_bg_color(splash_bg, lv_color_black(), 0);
+  lv_obj_set_style_bg_opa(splash_bg, LV_OPA_COVER, 0);   // background: always solid black
+
+  splash_img = lv_img_create(splash_bg);
+  lv_img_set_src(splash_img, "S:/images/Super_Earth.bin");
+  lv_obj_center(splash_img);
+  lv_obj_set_style_opa(splash_img, LV_OPA_TRANSP, 0);    // image starts invisible
+
+  lv_obj_fade_in(splash_img, 600, 0);   // fade the IMAGE in, revealing it over the solid black
+  Lvgl_Pump(700);
+}
+
+void Splash_Hide(void)
+{
+  if (!splash_bg) return;
+
+  lv_obj_move_foreground(splash_bg);    // Lvgl_Example1() just built 3 screens on top of this
+  lv_obj_fade_out(splash_img, 600, 0);  // fade the IMAGE back out, leaving solid black showing
+  Lvgl_Pump(700);
+
+  show_screen(0);                       // land on Automatic, now that we're at black
+
+  lv_obj_del(splash_bg);
+  splash_bg = NULL;
+  splash_img = NULL;
 }
 
 static void tab_icon_event_cb(lv_event_t * e)
@@ -92,40 +142,85 @@ static void swipe_event_cb(lv_event_t * e)
   else if (dir == LV_DIR_RIGHT) show_screen((active_screen + 2) % 3);  // (active-1) mod 3
 }
 
+static lv_obj_t * loadout_status_label = NULL;
 
-static void Automatic_grid_create(lv_obj_t * parent)
+static void refresh_grid_async(void * data)
 {
-  lv_obj_t * grid = lv_obj_create(parent);
-  lv_obj_set_size(grid, LV_PCT(100), LV_PCT(100));
-  lv_obj_center(grid);
-  lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_style_border_width(grid, 0, 0);
-  lv_obj_set_style_pad_all(grid, 2, 0);
-  lv_obj_set_style_pad_row(grid, 2, 0);
-  lv_obj_set_style_pad_column(grid, 2, 0);
-  lv_obj_set_flex_flow(grid, LV_FLEX_FLOW_ROW_WRAP);
-  lv_obj_set_flex_align(grid, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-  lv_obj_add_flag(grid, LV_OBJ_FLAG_GESTURE_BUBBLE);
-  lv_obj_set_style_bg_opa(grid, LV_OPA_TRANSP, 0);
+  Automatic_grid_refresh();
+  uint8_t idx = (uint8_t)(uintptr_t)data;
+  if (loadout_status_label && idx < loadout_count) {
+    char buf[48];
+    snprintf(buf, sizeof(buf), "Loaded: %s", loadouts[idx].name);
+    lv_label_set_text(loadout_status_label, buf);
+  }
+}
+
+static void loadout_dropdown_event_cb(lv_event_t * e)
+{
+  lv_obj_t * dd = lv_event_get_target(e);
+  uint16_t idx = lv_dropdown_get_selected(dd);
+
+  if (loadout_status_label) lv_label_set_text(loadout_status_label, "Updating...");
+
+  if (Stratagem_SelectLoadout((uint8_t)idx)) {
+    lv_async_call(refresh_grid_async, (void*)(uintptr_t)idx);
+  }
+}
+
+static void Settings_panel_create(lv_obj_t * parent)
+{
+  lv_obj_t * title = lv_label_create(parent);
+  lv_label_set_text(title, "Loadout");
+  lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 10);
+
+  char options[512] = {0};
+  for (int i = 0; i < loadout_count; i++) {
+    strlcat(options, loadouts[i].name, sizeof(options));
+    if (i < loadout_count - 1) strlcat(options, "\n", sizeof(options));
+  }
+  if (loadout_count == 0) strlcpy(options, "No loadouts found", sizeof(options));
+
+  lv_obj_t * dd = lv_dropdown_create(parent);
+  lv_dropdown_set_options(dd, options);
+  lv_dropdown_set_selected(dd, 0);
+  lv_obj_set_width(dd, 180);
+  lv_obj_align(dd, LV_ALIGN_TOP_MID, 0, 40);
+  lv_obj_add_flag(dd, LV_OBJ_FLAG_GESTURE_BUBBLE);
+  lv_obj_add_event_cb(dd, loadout_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+  loadout_status_label = lv_label_create(parent);
+  lv_label_set_text(loadout_status_label, "");
+  lv_obj_align(loadout_status_label, LV_ALIGN_TOP_MID, 0, 75);
+}
+
+
+static lv_obj_t * automatic_grid = NULL;
+
+static void Automatic_grid_populate(lv_obj_t * grid)
+{
+  lv_obj_clean(grid);   // wipe existing buttons before rebuilding
 
   for (int i = 0; i < 9; i++) {
     Stratagem * s = Stratagem_GetById(grid_loadout[i]);
     lv_obj_t * btn;
 
     if (s == NULL) {
-      printf("Stratagem : grid slot %d has no valid stratagem\r\n", i);
       btn = lv_label_create(grid);
       lv_label_set_text(btn, LV_SYMBOL_WARNING);
       lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
-    } else {
+    } 
+    else {
       const char * slash = strrchr(s->img_path, '/');
       const char * filename_only = slash ? slash + 1 : s->img_path;
 
-      if (File_Search("/images", filename_only)) {
+      if (s->icon_exists) 
+      {
         btn = lv_imgbtn_create(grid);
         lv_imgbtn_set_src(btn, LV_IMGBTN_STATE_RELEASED, NULL, s->img_path, NULL);
-      } else {
-        printf("SD : %s not found, falling back to placeholder button\r\n", filename_only);
+      } 
+      else 
+      {
+        printf("SD : %s not found, falling back to placeholder button\r\n", s->img_path);
         btn = lv_label_create(grid);
         lv_label_set_text(btn, LV_SYMBOL_IMAGE);
         lv_obj_set_style_text_font(btn, &lv_font_montserrat_14, 0);
@@ -138,12 +233,42 @@ static void Automatic_grid_create(lv_obj_t * parent)
     lv_obj_add_flag(btn, LV_OBJ_FLAG_GESTURE_BUBBLE);
   }
 }
+
+static void Automatic_grid_create(lv_obj_t * parent)
+{
+  automatic_grid = lv_obj_create(parent);
+  lv_obj_set_size(automatic_grid, LV_PCT(100), LV_PCT(100));
+  lv_obj_center(automatic_grid);
+  lv_obj_clear_flag(automatic_grid, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_style_border_width(automatic_grid, 0, 0);
+  lv_obj_set_style_pad_all(automatic_grid, 2, 0);
+  lv_obj_set_style_pad_row(automatic_grid, 2, 0);
+  lv_obj_set_style_pad_column(automatic_grid, 2, 0);
+  lv_obj_set_flex_flow(automatic_grid, LV_FLEX_FLOW_ROW_WRAP);
+  lv_obj_set_flex_align(automatic_grid, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_add_flag(automatic_grid, LV_OBJ_FLAG_GESTURE_BUBBLE);
+  lv_obj_set_style_bg_opa(automatic_grid, LV_OPA_TRANSP, 0);
+
+  Automatic_grid_populate(automatic_grid);
+}
+
+void Automatic_grid_refresh(void)
+{
+  if (automatic_grid) Automatic_grid_populate(automatic_grid);
+}
+
+static void play_sfx_async(void * data)
+{
+  Play_SFX("helldivers-2-arrow.mp3");
+}
+
 static void grid_btn_event_cb(lv_event_t * e)
 {
   const char * command = (const char*)lv_event_get_user_data(e);
   if (command) {
     printf("Stratagem grid: queuing %s\r\n", command);
     Queue_KeySequence(command);
+    lv_async_call(play_sfx_async, NULL);
   }
 }
 
@@ -265,18 +390,9 @@ void Lvgl_Example1(void){
     lv_obj_set_style_bg_opa(screens[i], LV_OPA_TRANSP, 0);   // let the screen's dark grey show through
   }
 
-  lv_obj_t * img_btn1 = Image_tab_create(screens[0], "AutomaticIcon_64.bin", "S:/images/AutomaticIcon_64.bin");
-  //lv_obj_t * img_btn2 = Image_tab_create(screens[1], "ManualIcon_64.bin", "S:/images/ManualIcon_64.bin");
-  // lv_obj_t * img_btn3 = Image_tab_create(screens[2], "icon3.bin", "S:/images/icon3.bin");
-  
+  Automatic_grid_create(screens[0]);
   Manual_arrows_create(screens[1]);
-  Automatic_grid_create(screens[2]);
-
-
-  // gestures only bubble up if the touched child opts in
-  lv_obj_add_flag(img_btn1, LV_OBJ_FLAG_GESTURE_BUBBLE);
-  // lv_obj_add_flag(img_btn2, LV_OBJ_FLAG_GESTURE_BUBBLE);
-  // lv_obj_add_flag(img_btn3, LV_OBJ_FLAG_GESTURE_BUBBLE);
+  Settings_panel_create(screens[2]);
 
   show_screen(0);   // start on screen 0; hides the other two
 

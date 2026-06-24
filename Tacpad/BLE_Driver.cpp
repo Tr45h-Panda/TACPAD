@@ -8,6 +8,7 @@
 #include <BLESecurity.h>
 #include <HIDTypes.h>
 #include <HIDKeyboardTypes.h>
+#include "BLE_Data_Service.h"
 
 constexpr const char* DEVICE_NAME = "ESP32S3 TACPAD";
 
@@ -75,13 +76,11 @@ static const InputReport NO_KEY_PRESSED = {
 class BleKeyboardCallbacks : public BLEServerCallbacks {
     void onConnect(BLEServer* server) override {
         isBleConnected = true;
-        Serial.println("BLE client connected");
+        printf("BLE client connected\r\n");
     }
-
-    void onDisconnect(BLEServer* server)
-    {
+    void onDisconnect(BLEServer* server) override {
         isBleConnected = false;
-        Serial.println("BLE client disconnected");
+        printf("BLE client disconnected\r\n");
     }
 };
 
@@ -94,49 +93,45 @@ static void sendReport(const InputReport& report) {
 }
 
 void bluetoothTask(void*) {
+    printf("bluetoothTask: started\r\n");
 
     BLEDevice::init(DEVICE_NAME);
+    printf("checkpoint: BLEDevice::init done\r\n");
 
     BLEServer* server = BLEDevice::createServer();
     server->setCallbacks(new BleKeyboardCallbacks());
+    printf("checkpoint: server created\r\n");
 
     hid = new BLEHIDDevice(server);
-
     input = hid->inputReport(1);
-
     hid->manufacturer()->setValue("TACPAD");
-
-    hid->pnp(
-        0x02,
-        0xE502,
-        0xA111,
-        0x0210
-    );
-
+    hid->pnp(0x02, 0xE502, 0xA111, 0x0210);
     hid->hidInfo(0x00, 0x01);
-
-    /*
-     * Standard keyboard report map.
-     * Provided by HIDKeyboardTypes.h
-     */
-    hid->reportMap((uint8_t*)REPORT_MAP,
-                sizeof(REPORT_MAP));
+    hid->reportMap((uint8_t*)REPORT_MAP, sizeof(REPORT_MAP));
+    printf("checkpoint: HID configured\r\n");
 
     hid->startServices();
+    printf("checkpoint: HID services started\r\n");
 
     hid->setBatteryLevel(100);
 
+    printf("checkpoint: before BLE_DataService_Init\r\n");
+    BLE_DataService_Init(server);
+    printf("checkpoint: after BLE_DataService_Init\r\n");
+
     BLESecurity* security = new BLESecurity();
     security->setAuthenticationMode(ESP_LE_AUTH_BOND);
+    printf("checkpoint: security configured\r\n");
 
     BLEAdvertising* advertising = server->getAdvertising();
-
     advertising->setAppearance(HID_KEYBOARD);
     advertising->addServiceUUID(hid->hidService()->getUUID());
+    printf("checkpoint: advertising configured\r\n");
 
     advertising->start();
+    printf("checkpoint: advertising started\r\n");
 
-    Serial.println("BLE keyboard advertising");
+    printf("BLE keyboard advertising\r\n");
 
     vTaskDelete(nullptr);
 }

@@ -109,3 +109,14 @@ void Audio_Loop()
 }
 
 
+void Play_SFX(const char* fileName)
+{
+  if (!File_Search("/mp3", fileName)) {
+    printf("Audio : SFX file %s not found\r\n", fileName);
+    return;
+  }
+  char filePath[100];
+  snprintf(filePath, sizeof(filePath), "/mp3/%s", fileName);
+  audio.connecttoFS(SD_MMC, filePath);
+}
+

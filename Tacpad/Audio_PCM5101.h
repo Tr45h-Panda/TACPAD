@@ -25,3 +25,4 @@ void Music_resume();
 uint32_t Music_Duration();  
 uint32_t Music_Elapsed();   
 uint16_t Music_Energy();    
+void Play_SFX(const char* fileName);

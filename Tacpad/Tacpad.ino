@@ -13,6 +13,8 @@
 #include "BLE_Driver.h"
 #include "Stratagem_Data.h"
 #include "I2C_Driver.h"
+#include "BLE_Data_Service.h"
+#include <esp_system.h>
 
 
 void DriverTask(void *parameter) {
@@ -50,6 +52,9 @@ void BLE_Loop() {
 
 void setup()
 {
+  esp_reset_reason_t reason = esp_reset_reason();
+  printf("Reset reason code: %d\r\n", (int)reason);
+  
   Flash_test();
   Button_Init();
   PWR_Init();
@@ -63,15 +68,22 @@ void setup()
   Backlight_Init();
 
   SD_Init();
-  Stratagem_LoadCSV("/Stratagems.csv");
-  Stratagem_LoadLoadout("/loadout.txt");
-
-  Audio_Init();
   LCD_Init();
   Lvgl_Init();
 
+  Splash_Show();
+
+  Stratagem_LoadCSV("/Stratagems.csv");
+  Stratagem_LoadAllLoadouts("/loadout.txt");
+  Stratagem_SelectLoadout(0);
+  Audio_Init();
+
   Lvgl_Example1();
 
+  Splash_Hide();
+
+  BLE_Loop();
+  BLE_Queue_Init();
   Driver_Loop();
 
   
@@ -80,5 +92,13 @@ void setup()
 void loop()
 {
   Lvgl_Loop();
+
+  char loadoutMsg[BLE_RX_MAXLEN];
+  if (BLE_PollReceived(loadoutMsg, sizeof(loadoutMsg))) {
+    printf("Got loadout from PC: %s\r\n", loadoutMsg);
+    Stratagem_ParseLoadoutString(loadoutMsg);
+    Automatic_grid_refresh();
+  }
+
   vTaskDelay(pdMS_TO_TICKS(5));
 }
